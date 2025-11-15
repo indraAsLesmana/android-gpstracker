@@ -1,13 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
--->
+<?xml version="1.0" encoding="utf-8"?>
 <full-backup-content>
     <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    This is a default backup configuration.
+    All files in the app's domain are backed up by default.
+    You can customize what is included and excluded from your backups.
+    For more information, see the Android developer documentation:
+    https://developer.android.com/guide/topics/data/autobackup
+    -->
 </full-backup-content>

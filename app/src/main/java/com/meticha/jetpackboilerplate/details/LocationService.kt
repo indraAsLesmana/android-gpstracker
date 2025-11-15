@@ -4,6 +4,7 @@ package com.meticha.jetpackboilerplate.details
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Intent
 import android.os.Build
@@ -11,6 +12,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
+import com.meticha.jetpackboilerplate.MainActivity
 import com.meticha.jetpackboilerplate.R
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -90,10 +92,22 @@ class LocationService : Service() {
             notificationManager.createNotificationChannel(channel)
         }
 
+        val notificationIntent = Intent(this, MainActivity::class.java)
+        notificationIntent.action = "OPEN_DETAILS_SCREEN"
+        notificationIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Location Service")
             .setContentText("Tracking your location in the background")
             .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
             .build()
 
         startForeground(NOTIFICATION_ID, notification)

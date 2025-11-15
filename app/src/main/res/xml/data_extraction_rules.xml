@@ -1,19 +1,21 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
--->
+<?xml version="1.0" encoding="utf-8"?>
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
+        <!--
+        This is a default data extraction configuration.
+        All files in the app's domain are backed up by default.
+        You can customize what is included and excluded from your backups.
+        For more information, see the Android developer documentation:
+        https://developer.android.com/guide/topics/data/autobackup
         -->
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <!--
+        This is a default data extraction configuration for device-to-device transfers.
+        All files in the app's domain are transferred by default.
+        You can customize what is included and excluded from your backups.
+        For more information, see the Android developer documentation:
+        https://developer.android.com/guide/topics/data/autobackup#Device-to-device-transfers
+        -->
     </device-transfer>
-    -->
 </data-extraction-rules>

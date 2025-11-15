@@ -2,10 +2,10 @@ package com.meticha.jetpackboilerplate.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
@@ -20,9 +20,7 @@ data object HomeRoute : NavKey
 data object DetailsRoute : NavKey
 
 @Composable
-fun AppNavigation() {
-    val backStack = rememberNavBackStack(HomeRoute)
-
+fun AppNavigation(backStack: NavBackStack) {
     NavDisplay(
         entryDecorators = listOf(
             // Add the default decorators for managing scenes and saving state
