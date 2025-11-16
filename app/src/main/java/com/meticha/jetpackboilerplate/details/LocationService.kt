@@ -14,7 +14,13 @@ import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
 import com.meticha.jetpackboilerplate.MainActivity
 import com.meticha.jetpackboilerplate.R
+import com.meticha.jetpackboilerplate.data.LocationData
+import com.meticha.jetpackboilerplate.data.repository.LocationRepository
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -22,6 +28,11 @@ class LocationService : Service() {
 
     @Inject
     lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+
+    @Inject
+    lateinit var locationRepository: LocationRepository
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private lateinit var locationCallback: LocationCallback
 
@@ -54,6 +65,18 @@ class LocationService : Service() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation?.let {
                     Log.d(TAG, "Lat: ${it.latitude}, Lon: ${it.longitude}")
+                    serviceScope.launch {
+                        val locationData = LocationData(
+                            lot = it.latitude.toString(),
+                            lang = it.longitude.toString(),
+                            device = Build.MODEL
+                        )
+                        try {
+                            locationRepository.sendLocation(locationData)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error sending location data", e)
+                        }
+                    }
                 }
             }
         }
