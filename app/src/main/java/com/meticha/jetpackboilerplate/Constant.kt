@@ -19,4 +19,7 @@ object Constants {
     } else {
         TimeUnit.HOURS.toMillis(3)
     }
+
+    // start location service on background with persistent notification enable.
+    const val AUTO_START_LOCATION_SERVICE = true
 }
