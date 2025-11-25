@@ -12,6 +12,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun HomeScreen(
     onNavigateToDetails: () -> Unit,
+    onNavigateToXmlDetails: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -44,6 +45,11 @@ fun HomeScreen(
                 onClick = onNavigateToDetails
             ) {
                 Text("Home Screen")
+            }
+            ElevatedButton(
+                onClick = onNavigateToXmlDetails
+            ) {
+                Text("XML screen")
             }
         }
     }

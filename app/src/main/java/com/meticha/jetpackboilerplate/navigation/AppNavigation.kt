@@ -11,6 +11,9 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import com.meticha.jetpackboilerplate.details.DetailsScreen
 import com.meticha.jetpackboilerplate.home.HomeScreen
+import com.meticha.jetpackboilerplate.detailsxml.detailxml
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -33,9 +36,14 @@ fun AppNavigation(backStack: NavBackStack) {
         onBack = { backStack.removeLastOrNull() },
         entryProvider = entryProvider {
             entry<HomeRoute> {
+                val context = LocalContext.current
                 HomeScreen(
                     onNavigateToDetails = {
                         backStack.add(DetailsRoute)
+                    },
+                    onNavigateToXmlDetails = {
+                        val intent = Intent(context, detailxml::class.java)
+                        context.startActivity(intent)
                     }
                 )
             }
