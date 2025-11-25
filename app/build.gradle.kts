@@ -59,7 +59,6 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3.android)
-    implementation(libs.play.services.maps)
 
     implementation("com.google.maps.android:maps-utils-ktx:5.2.1")
 
