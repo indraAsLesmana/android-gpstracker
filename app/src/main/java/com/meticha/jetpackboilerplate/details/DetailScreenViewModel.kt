@@ -45,7 +45,12 @@ class DetailScreenViewModel @Inject constructor(
     }
 
     fun fetchAndSendLocationImmediately() {
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .build()
+
         val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.meticha.jetpackboilerplate.workers.LocationWorker>()
+            .setConstraints(constraints)
             .build()
         workManager.enqueue(workRequest)
     }

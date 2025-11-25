@@ -36,9 +36,14 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleLocationWork() {
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .build()
+
         val workRequest = PeriodicWorkRequestBuilder<LocationWorker>(
             15, TimeUnit.MINUTES
-        ).build()
+        ).setConstraints(constraints)
+            .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "LocationWork",

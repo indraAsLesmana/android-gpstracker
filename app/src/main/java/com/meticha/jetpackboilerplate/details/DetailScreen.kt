@@ -45,12 +45,36 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
         }
+        
+        // On Android 10 (Q) and above, background location permission is needed.
+        // On Android 11 (R) and above, it must be requested separately.
+        // For now, let's request it if we can.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+             // Note: On Android 11+, requesting this with other permissions might be ignored or cause issues.
+             // But for Android 10 it works.
+             // Ideally we should have a separate flow.
+             // Let's add it here for now, but if it fails, the user needs to go to settings.
+             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                 permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+             }
+        }
 
         if (permissionsToRequest.isNotEmpty()) {
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
         } else {
             viewModel.startLocationUpdates()
             viewModel.fetchAndSendLocationImmediately()
+            
+            // Check for background permission on Android 11+ separately
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // We can't request it directly in the same launcher easily without a separate flow.
+                // For this MVP, we will rely on the user granting "Allow all the time" in settings
+                // or we could trigger a separate request here.
+                // Let's try to request it if fine location is already granted.
+                 permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+            }
         }
     }
 

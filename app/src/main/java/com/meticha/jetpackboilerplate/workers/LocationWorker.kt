@@ -60,13 +60,26 @@ class LocationWorker @AssistedInject constructor(
     private suspend fun fetchCurrentLocation(): Location? {
         return try {
             val cancellationTokenSource = CancellationTokenSource()
-            fusedLocationProviderClient.getCurrentLocation(
+            val location = fusedLocationProviderClient.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY,
                 cancellationTokenSource.token
             ).await()
+            
+            if (location != null) {
+                location
+            } else {
+                Log.w(TAG, "getCurrentLocation returned null, trying getLastLocation")
+                fusedLocationProviderClient.lastLocation.await()
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Error fetching location", e)
-            null
+            try {
+                 Log.w(TAG, "Trying getLastLocation after error")
+                 fusedLocationProviderClient.lastLocation.await()
+            } catch (e2: Exception) {
+                Log.e(TAG, "Error fetching last location", e2)
+                null
+            }
         }
     }
 
