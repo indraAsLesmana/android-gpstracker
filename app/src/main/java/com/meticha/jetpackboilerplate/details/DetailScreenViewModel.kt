@@ -47,7 +47,7 @@ class DetailScreenViewModel @Inject constructor(
     @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
         val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, 10_000 // 10 seconds
+            Priority.PRIORITY_HIGH_ACCURACY, 45_000 // 45 seconds
         ).build()
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest,

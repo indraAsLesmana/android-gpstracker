@@ -78,7 +78,7 @@ class LocationService : Service() {
         }
 
         val locationRequest = LocationRequest.Builder(
-            Priority.PRIORITY_HIGH_ACCURACY, 10000
+            Priority.PRIORITY_HIGH_ACCURACY, 45_000
         ).build()
 
         try {
