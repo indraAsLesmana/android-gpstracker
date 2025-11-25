@@ -17,15 +17,10 @@ fun Context.hasLocationPermission(): Boolean {
 }
 
 fun Context.hasBackgroundLocationPermission(): Boolean {
-    return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-        ContextCompat.checkSelfPermission(
-            this,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    } else {
-        // Below API 29, fine location implies background access
-        hasLocationPermission()
-    }
+    return ContextCompat.checkSelfPermission(
+        this,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+    ) == PackageManager.PERMISSION_GRANTED
 }
 
 fun Context.openAppSettings() {

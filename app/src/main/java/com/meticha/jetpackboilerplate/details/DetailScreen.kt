@@ -59,7 +59,7 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
                     viewModel.startLocationUpdates()
                     viewModel.fetchAndSendLocationImmediately()
                 }
-            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            } else {
                 // API 29: Request background permission directly
                 if (!context.hasBackgroundLocationPermission()) {
                     backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
@@ -67,10 +67,6 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
                     viewModel.startLocationUpdates()
                     viewModel.fetchAndSendLocationImmediately()
                 }
-            } else {
-                // API < 29: Fine location implies background access (or not needed separately)
-                viewModel.startLocationUpdates()
-                viewModel.fetchAndSendLocationImmediately()
             }
         }
     }
@@ -87,16 +83,13 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
                     viewModel.startLocationUpdates()
                     viewModel.fetchAndSendLocationImmediately()
                 }
-            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+            } else {
                 if (!context.hasBackgroundLocationPermission()) {
                     backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
                 } else {
                     viewModel.startLocationUpdates()
                     viewModel.fetchAndSendLocationImmediately()
                 }
-            } else {
-                viewModel.startLocationUpdates()
-                viewModel.fetchAndSendLocationImmediately()
             }
         }
     }
