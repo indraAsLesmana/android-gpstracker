@@ -12,6 +12,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.SphericalUtil.computeDistanceBetween
 import com.meticha.jetpackboilerplate.Constants
 import com.meticha.jetpackboilerplate.MainActivity
 import com.meticha.jetpackboilerplate.R
@@ -74,6 +76,11 @@ class LocationService : Service() {
             override fun onLocationResult(locationResult: LocationResult) {
                 lastLocation = locationResult.lastLocation
                 Log.d(TAG, "New Location: Lat: ${lastLocation?.latitude}, Lon: ${lastLocation?.longitude}")
+
+                val firstLat = LatLng(-6.3082385, 106.7328958)
+                val secondLat = LatLng( lastLocation!!.latitude, lastLocation!!.longitude)
+
+                Log.d(TAG, "RESULTS DISTANCE :  " + getDistance(firstLat,secondLat))
             }
         }
 
@@ -164,5 +171,29 @@ class LocationService : Service() {
         private const val NOTIFICATION_ID = 1
         const val ACTION_START = "LocationService.ACTION_START"
         const val ACTION_STOP = "LocationService.ACTION_STOP"
+    }
+
+
+    fun getDistance(firstLatLong: LatLng, secondLatLong: LatLng) :String {
+        val distanceBetweenLocation =  formatNumber(computeDistanceBetween(firstLatLong, secondLatLong))
+
+        Log.d(TAG, "distance location " + computeDistanceBetween(firstLatLong, secondLatLong))
+
+        return "The markers are " +  distanceBetweenLocation + " apart."
+
+    }
+
+    private fun formatNumber(distance: Double): String {
+        var distance = distance
+        var unit = "m"
+        if (distance < 1) {
+            distance *= 1000.0
+            unit = "mm"
+        } else if (distance > 1000) {
+            distance /= 1000.0
+            unit = "km"
+        }
+
+        return String.format("%4.3f%s", distance.toInt(), unit)
     }
 }
