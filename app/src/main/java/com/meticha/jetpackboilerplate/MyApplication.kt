@@ -1,30 +1,25 @@
 package com.meticha.jetpackboilerplate
 
-import android.Manifest
 import android.app.Application
-import android.content.Intent
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import com.meticha.jetpackboilerplate.details.LocationService
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
-class MyApplication : Application() {
+class MyApplication : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 
     override fun onCreate() {
         super.onCreate()
-
-        if (Constants.AUTO_START_LOCATION_SERVICE) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                val intent = Intent(this, LocationService::class.java).apply {
-                    action = LocationService.ACTION_START
-                }
-                startForegroundService(intent)
-            }
-        }
+        // LocationService auto-start logic removed.
+        // WorkManager scheduling will be handled in MainActivity or a dedicated manager.
     }
 }

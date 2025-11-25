@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.hilt.navigation.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.hilt.compiler.androidx)
 
     // Navigation Compose
     implementation(libs.androidx.material3.navigation3)
@@ -71,6 +74,7 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.play.services.location)
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Ktor
     implementation(libs.ktor.client.core)

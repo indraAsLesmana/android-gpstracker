@@ -29,7 +29,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 @Composable
 fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
     val location by viewModel.location.collectAsState()
-    val isServiceRunning by viewModel.isServiceRunning.collectAsState()
     val context = LocalContext.current
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -38,26 +37,12 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
         if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
             viewModel.startLocationUpdates()
         }
-        // Notification permission result is handled by the dedicated launcher below
     }
-
-    val notificationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission(),
-        onResult = { isGranted ->
-            if (isGranted) {
-                viewModel.toggleLocationService()
-            }
-        }
-    )
 
     LaunchedEffect(Unit) {
         val permissionsToRequest = mutableListOf<String>()
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.POST_NOTIFICATIONS)
         }
 
         if (permissionsToRequest.isNotEmpty()) {
@@ -68,36 +53,13 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
     }
 
     DetailScreenLayout(
-        location = location,
-        isServiceRunning = isServiceRunning,
-        onToggleLocationService = {
-            if (isServiceRunning) {
-                viewModel.toggleLocationService() // No permission needed to stop
-            } else {
-                // Check for notification permission before starting the service
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.POST_NOTIFICATIONS
-                        ) == PackageManager.PERMISSION_GRANTED
-                    ) {
-                        viewModel.toggleLocationService()
-                    } else {
-                        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                } else {
-                    viewModel.toggleLocationService() // No runtime permission needed for older versions
-                }
-            }
-        }
+        location = location
     )
 }
 
 @Composable
 fun DetailScreenLayout(
-    location: Location?,
-    isServiceRunning: Boolean,
-    onToggleLocationService: () -> Unit
+    location: Location?
 ) {
     Scaffold {
         Column(
@@ -112,9 +74,7 @@ fun DetailScreenLayout(
                 Text("Latitude: ${it.latitude}")
                 Text("Longitude: ${it.longitude}")
             }
-            Button(onClick = onToggleLocationService) {
-                Text(if (isServiceRunning) "Stop Location Service" else "Start Location Service")
-            }
+            Text("Location tracking is active in background (every 15 mins)")
         }
     }
 }
@@ -127,8 +87,6 @@ fun DetailsScreenPreview() {
         longitude = -122.4194
     }
     DetailScreenLayout(
-        location = location,
-        isServiceRunning = false,
-        onToggleLocationService = {}
+        location = location
     )
 }
