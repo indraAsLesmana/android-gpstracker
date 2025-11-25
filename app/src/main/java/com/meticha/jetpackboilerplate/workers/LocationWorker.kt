@@ -15,6 +15,8 @@ import com.meticha.jetpackboilerplate.data.LocationData
 import com.meticha.jetpackboilerplate.data.repository.LocationRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+
+import com.meticha.jetpackboilerplate.utils.hasLocationPermission
 import kotlinx.coroutines.tasks.await
 
 @HiltWorker
@@ -30,10 +32,10 @@ class LocationWorker @AssistedInject constructor(
         return try {
             Log.d(TAG, "Starting location work")
             
-            // Note: In a real app, you should check for permissions here.
-            // However, WorkManager might run when the app is in the background,
-            // and requesting permissions is not possible.
-            // We assume permissions are granted.
+            if (!applicationContext.hasLocationPermission()) {
+                Log.w(TAG, "Location permission not granted. Aborting work.")
+                return Result.failure()
+            }
 
             val location = fetchCurrentLocation()
             if (location != null) {
