@@ -34,9 +34,9 @@ class DetailScreenViewModel @Inject constructor(
 
     @SuppressLint("MissingPermission")
     fun startLocationUpdates() {
-        val locationRequest = LocationRequest.Builder(
+        val locationRequest = com.meticha.jetpackboilerplate.utils.createLocationRequest(
             Priority.PRIORITY_HIGH_ACCURACY, 45_000 // 45 seconds
-        ).build()
+        )
         fusedLocationProviderClient.requestLocationUpdates(
             locationRequest,
             locationCallback,

@@ -17,6 +17,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
 import com.meticha.jetpackboilerplate.utils.hasLocationPermission
+import com.meticha.jetpackboilerplate.utils.fetchCurrentLocation
 import kotlinx.coroutines.tasks.await
 
 @HiltWorker
@@ -37,7 +38,7 @@ class LocationWorker @AssistedInject constructor(
                 return Result.failure()
             }
 
-            val location = fetchCurrentLocation()
+            val location = fusedLocationProviderClient.fetchCurrentLocation()
             if (location != null) {
                 Log.d(TAG, "Location fetched: ${location.latitude}, ${location.longitude}")
                 val locationData = LocationData(
@@ -56,33 +57,6 @@ class LocationWorker @AssistedInject constructor(
         } catch (e: Exception) {
             Log.e(TAG, "Error in LocationWorker", e)
             Result.retry()
-        }
-    }
-
-    @SuppressLint("MissingPermission")
-    private suspend fun fetchCurrentLocation(): Location? {
-        return try {
-            val cancellationTokenSource = CancellationTokenSource()
-            val location = fusedLocationProviderClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                cancellationTokenSource.token
-            ).await()
-            
-            if (location != null) {
-                location
-            } else {
-                Log.w(TAG, "getCurrentLocation returned null, trying getLastLocation")
-                fusedLocationProviderClient.lastLocation.await()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error fetching location", e)
-            try {
-                 Log.w(TAG, "Trying getLastLocation after error")
-                 fusedLocationProviderClient.lastLocation.await()
-            } catch (e2: Exception) {
-                Log.e(TAG, "Error fetching last location", e2)
-                null
-            }
         }
     }
 
