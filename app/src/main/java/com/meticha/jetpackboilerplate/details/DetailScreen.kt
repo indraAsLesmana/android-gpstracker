@@ -36,6 +36,7 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
     ) { permissions ->
         if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
             viewModel.startLocationUpdates()
+            viewModel.fetchAndSendLocationImmediately()
         }
     }
 
@@ -49,6 +50,7 @@ fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
             permissionLauncher.launch(permissionsToRequest.toTypedArray())
         } else {
             viewModel.startLocationUpdates()
+            viewModel.fetchAndSendLocationImmediately()
         }
     }
 

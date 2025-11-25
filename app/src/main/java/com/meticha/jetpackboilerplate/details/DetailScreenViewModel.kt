@@ -19,7 +19,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class DetailScreenViewModel @Inject constructor(
-    private val fusedLocationProviderClient: FusedLocationProviderClient
+    private val fusedLocationProviderClient: FusedLocationProviderClient,
+    private val workManager: androidx.work.WorkManager
 ) : ViewModel() {
 
     private val _location = MutableStateFlow<Location?>(null)
@@ -41,6 +42,12 @@ class DetailScreenViewModel @Inject constructor(
             locationCallback,
             null
         )
+    }
+
+    fun fetchAndSendLocationImmediately() {
+        val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.meticha.jetpackboilerplate.workers.LocationWorker>()
+            .build()
+        workManager.enqueue(workRequest)
     }
 
     override fun onCleared() {
