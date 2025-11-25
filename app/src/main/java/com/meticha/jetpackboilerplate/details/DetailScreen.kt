@@ -2,7 +2,6 @@
 package com.meticha.jetpackboilerplate.details
 
 import android.Manifest
-import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
@@ -19,63 +18,108 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.meticha.jetpackboilerplate.utils.hasBackgroundLocationPermission
+import com.meticha.jetpackboilerplate.utils.hasLocationPermission
+import com.meticha.jetpackboilerplate.utils.openLocationSettings
 
 @Composable
+
 fun DetailsScreen(viewModel: DetailScreenViewModel = hiltViewModel()) {
     val location by viewModel.location.collectAsState()
     val context = LocalContext.current
+    var showBackgroundLocationRationale by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
 
-    val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) {
+    // Launcher for Background Permission (API 29 only)
+    val backgroundPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
             viewModel.startLocationUpdates()
             viewModel.fetchAndSendLocationImmediately()
         }
     }
 
-    LaunchedEffect(Unit) {
-        val permissionsToRequest = mutableListOf<String>()
-        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionsToRequest.add(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
-        
-        // On Android 10 (Q) and above, background location permission is needed.
-        // On Android 11 (R) and above, it must be requested separately.
-        // For now, let's request it if we can.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-             // Note: On Android 11+, requesting this with other permissions might be ignored or cause issues.
-             // But for Android 10 it works.
-             // Ideally we should have a separate flow.
-             // Let's add it here for now, but if it fails, the user needs to go to settings.
-             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                 permissionsToRequest.add(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-             }
-        }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            permissionLauncher.launch(permissionsToRequest.toTypedArray())
-        } else {
-            viewModel.startLocationUpdates()
-            viewModel.fetchAndSendLocationImmediately()
-            
-            // Check for background permission on Android 11+ separately
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-                ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_BACKGROUND_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // We can't request it directly in the same launcher easily without a separate flow.
-                // For this MVP, we will rely on the user granting "Allow all the time" in settings
-                // or we could trigger a separate request here.
-                // Let's try to request it if fine location is already granted.
-                 permissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION))
+    // Launcher for Fine Location
+    val fineLocationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            // Check for background permission
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                // API 30+: Check if background permission is granted
+                if (!context.hasBackgroundLocationPermission()) {
+                    showBackgroundLocationRationale = true
+                } else {
+                    viewModel.startLocationUpdates()
+                    viewModel.fetchAndSendLocationImmediately()
+                }
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                // API 29: Request background permission directly
+                if (!context.hasBackgroundLocationPermission()) {
+                    backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                } else {
+                    viewModel.startLocationUpdates()
+                    viewModel.fetchAndSendLocationImmediately()
+                }
+            } else {
+                // API < 29: Fine location implies background access (or not needed separately)
+                viewModel.startLocationUpdates()
+                viewModel.fetchAndSendLocationImmediately()
             }
         }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!context.hasLocationPermission()) {
+            fineLocationLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        } else {
+            // Fine location already granted, check background
+             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (!context.hasBackgroundLocationPermission()) {
+                    showBackgroundLocationRationale = true
+                } else {
+                    viewModel.startLocationUpdates()
+                    viewModel.fetchAndSendLocationImmediately()
+                }
+            } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q) {
+                if (!context.hasBackgroundLocationPermission()) {
+                    backgroundPermissionLauncher.launch(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                } else {
+                    viewModel.startLocationUpdates()
+                    viewModel.fetchAndSendLocationImmediately()
+                }
+            } else {
+                viewModel.startLocationUpdates()
+                viewModel.fetchAndSendLocationImmediately()
+            }
+        }
+    }
+
+    if (showBackgroundLocationRationale) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showBackgroundLocationRationale = false },
+            title = { Text("Background Location Needed") },
+            text = { Text("To track your location in the background, please select \"Allow all the time\" in the settings.") },
+            confirmButton = {
+                Button(onClick = {
+                    showBackgroundLocationRationale = false
+                    context.openLocationSettings()
+                }) {
+                    Text("Open Settings")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showBackgroundLocationRationale = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     DetailScreenLayout(

@@ -45,6 +45,7 @@ class LocationWorker @AssistedInject constructor(
                     lang = location.longitude.toString(),
                     device = Build.MODEL
                 )
+                // place logic distance comparison before send data here
                 locationRepository.sendLocation(locationData)
                 Log.d(TAG, "Location sent successfully")
                 Result.success()
